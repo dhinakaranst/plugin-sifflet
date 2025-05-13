@@ -1,0 +1,50 @@
+id: sifflet-data-quality-check
+namespace: io.kestra.examples
+
+description: |
+  This flow demonstrates how to use the Sifflet plugin to run a data quality rule
+  and take action based on the result.
+
+inputs:
+  - id: apiUrl
+    type: STRING
+    required: true
+    description: "The base URL of the Sifflet API (e.g., https://tenant.siffletdata.com/api/v1)"
+  - id: accessToken
+    type: STRING
+    required: true
+    description: "The access token for authenticating with the Sifflet API"
+  - id: ruleId
+    type: STRING
+    required: true
+    description: "The ID of the Sifflet rule to run"
+
+tasks:
+  - id: run-sifflet-rule
+    type: io.kestra.plugin.sifflet.RunRule
+    apiUrl: "{{ inputs.apiUrl }}"
+    accessToken: "{{ inputs.accessToken }}"
+    ruleId: "{{ inputs.ruleId }}"
+    connectionTimeout: PT30S
+    requestTimeout: PT1M
+
+  - id: log-result
+    type: io.kestra.plugin.core.log.Log
+    message: |
+      Sifflet Rule Run Results:
+      Rule ID: {{ outputs.run-sifflet-rule.ruleId }}
+      Status: {{ outputs.run-sifflet-rule.success ? "Success" : "Failed" }}
+      Status Code: {{ outputs.run-sifflet-rule.statusCode }}
+      Response: {{ outputs.run-sifflet-rule.response }}
+
+  - id: conditional-action
+    type: io.kestra.plugin.core.flow.If
+    condition: "{{ outputs.run-sifflet-rule.success }}"
+    then:
+      - id: success-action
+        type: io.kestra.plugin.core.log.Log
+        message: "Data quality check passed! Proceeding with downstream tasks."
+    else:
+      - id: failure-action
+        type: io.kestra.plugin.core.log.Log
+        message: "Data quality check failed! Taking remediation actions."

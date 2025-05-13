@@ -1,0 +1,30 @@
+id: sifflet-run-rule
+namespace: io.kestra.plugin.sifflet
+
+inputs:
+  - id: apiUrl
+    type: STRING
+    required: true
+  - id: accessToken
+    type: STRING
+    required: true
+  - id: ruleId
+    type: STRING
+    required: true
+
+tasks:
+  - id: run-rule
+    type: io.kestra.plugin.sifflet.RunRule
+    apiUrl: "{{ inputs.apiUrl }}"
+    accessToken: "{{ inputs.accessToken }}"
+    ruleId: "{{ inputs.ruleId }}"
+    connectionTimeout: PT30S
+    requestTimeout: PT1M
+
+  - id: log-result
+    type: io.kestra.plugin.core.log.Log
+    message: |
+      Rule ID: {{ outputs.run-rule.ruleId }}
+      Status: {{ outputs.run-rule.success ? "Success" : "Failed" }}
+      Status Code: {{ outputs.run-rule.statusCode }}
+      Response: {{ outputs.run-rule.response }}
