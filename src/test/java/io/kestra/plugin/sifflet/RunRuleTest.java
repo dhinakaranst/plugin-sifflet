@@ -22,8 +22,10 @@ class RunRuleTest {
     private RunContextFactory runContextFactory;
 
     /**
-     * This test is only enabled if the SIFFLET_API_URL, SIFFLET_ACCESS_TOKEN, and SIFFLET_RULE_ID
-     * environment variables are set. This allows for testing against a real Sifflet instance.
+     * This test is only enabled if the SIFFLET_API_URL, SIFFLET_ACCESS_TOKEN, and
+     * SIFFLET_RULE_ID
+     * environment variables are set. This allows for testing against a real Sifflet
+     * instance.
      */
     @Test
     @EnabledIfEnvironmentVariable(named = "SIFFLET_API_URL", matches = ".+")
@@ -35,19 +37,19 @@ class RunRuleTest {
         vars.put("apiUrl", System.getenv("SIFFLET_API_URL"));
         vars.put("accessToken", System.getenv("SIFFLET_ACCESS_TOKEN"));
         vars.put("ruleId", System.getenv("SIFFLET_RULE_ID"));
-        
+
         RunContext runContext = runContextFactory.of(vars);
 
         // Create and run the task
         RunRule task = RunRule.builder()
-            .id("test-task")
-            .type(RunRule.class.getName())
-            .apiUrl("{{ apiUrl }}")
-            .accessToken("{{ accessToken }}")
-            .ruleId("{{ ruleId }}")
-            .connectionTimeout(Duration.ofSeconds(30))
-            .requestTimeout(Duration.ofMinutes(1))
-            .build();
+                .id("test-task")
+                .type(RunRule.class.getName())
+                .baseUrl("{{ baseUrl }}")
+                .apiKey("{{ apiKey }}")
+                .ruleId("{{ ruleId }}")
+                .connectionTimeout(Duration.ofSeconds(30))
+                .requestTimeout(Duration.ofMinutes(1))
+                .build();
 
         // Execute the task
         RunRule.Output output = task.run(runContext);
@@ -66,19 +68,19 @@ class RunRuleTest {
         vars.put("apiUrl", "https://invalid-url");
         vars.put("accessToken", "dummy-token");
         vars.put("ruleId", "dummy-rule-id");
-        
+
         RunContext runContext = runContextFactory.of(vars);
 
         // Create the task
         RunRule task = RunRule.builder()
-            .id("test-task")
-            .type(RunRule.class.getName())
-            .apiUrl("{{ apiUrl }}")
-            .accessToken("{{ accessToken }}")
-            .ruleId("{{ ruleId }}")
-            .connectionTimeout(Duration.ofSeconds(5))
-            .requestTimeout(Duration.ofSeconds(10))
-            .build();
+                .id("test-task")
+                .type(RunRule.class.getName())
+                .baseUrl("{{ baseUrl }}")
+                .apiKey("{{ apiKey }}")
+                .ruleId("{{ ruleId }}")
+                .connectionTimeout(Duration.ofSeconds(5))
+                .requestTimeout(Duration.ofSeconds(10))
+                .build();
 
         // Execute the task and expect an exception
         assertThrows(Exception.class, () -> task.run(runContext));
